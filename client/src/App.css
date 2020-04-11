@@ -16,6 +16,7 @@
 body {
   background-color: var(--swatch-foundation);
   font-family: 'Lexend Exa';
+  white-space: pre;
 }
 
 #home_banner_container {

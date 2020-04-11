@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import '../App.css';
 import gql from 'graphql-tag';
 import { Query, Mutation } from 'react-apollo';
+import TextEditWorkspace from './TextEditWorkspace';
 
 const GET_LOGO = gql`
     query logo($logoId: String) {
@@ -11,7 +12,12 @@ const GET_LOGO = gql`
             text
             color
             fontSize
-            lastUpdate
+            backgroundColor
+            borderColor
+            borderRadius
+            borderWidth
+            padding
+            margin
         }
     }
 `;
@@ -42,6 +48,8 @@ class ViewLogoScreen extends Component {
                                         View Logo
                                     </h3>
                                 </div>
+                                <div className="row">
+                                    <div class="col-2">
                                 <div className="panel-body">
                                     <dl>
                                         <dt>Text:</dt>
@@ -50,6 +58,19 @@ class ViewLogoScreen extends Component {
                                         <dd>{data.logo.color}</dd>
                                         <dt>Font Size:</dt>
                                         <dd>{data.logo.fontSize}</dd>
+                                        <dt>Background Color:</dt>
+                                        <dd>{data.logo.backgroundColor}</dd>
+                                        <dt>Border Color:</dt>
+                                        <dd>{data.logo.borderColor}</dd>
+                                        <dt>Border Radius:</dt>
+                                        <dd>{data.logo.borderRadius}</dd>
+                                        <dt>Border Width:</dt>
+                                        <dd>{data.logo.borderWidth}</dd>
+                                        <dt>Padding:</dt>
+                                        <dd>{data.logo.padding}</dd>
+                                        <dt>Margin:</dt>
+                                        <dd>{data.logo.margin}</dd>
+
                                         <dt>Last Updated:</dt>
                                         <dd>{data.logo.lastUpdate}</dd>
                                     </dl>
@@ -70,6 +91,25 @@ class ViewLogoScreen extends Component {
                                         )}
                                     </Mutation>
                                 </div>
+                                </div>
+                                <div className="col-14">
+                                <TextEditWorkspace
+                                                text={data.logo.text}
+                                                color={data.logo.color}
+                                                fontSize={data.logo.fontSize}
+                                                backgroundColor={data.logo.backgroundColor}
+                                                borderColor={data.logo.borderColor}
+                                                borderRadius={data.logo.borderRadius}
+                                                borderWidth={data.logo.borderWidth}
+                                                padding={data.logo.padding}
+                                                margin={data.logo.margin}
+                                            
+                                                />
+                                </div>
+                                </div>
+                                
+
+
                             </div>
                         </div>
                     );
