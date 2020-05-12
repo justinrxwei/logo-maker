@@ -9,6 +9,47 @@ var GraphQLInt = require('graphql').GraphQLInt;
 var GraphQLDate = require('graphql-date');
 var LogoModel = require('../models/Logo');
 
+// var textType = new GraphQLObjectType({
+//     name: 'textObject',
+//     fields: function() {
+//         return {
+//             text: {
+//                 GraphQLString
+//             },
+//             color: {
+//                 type: GraphQLString
+//             }, 
+//             fontSize: {
+//                 type: GraphQLInt
+//             },
+//             x: {
+//                 type: GraphQLInt
+//             },
+//             y: {
+//                 type: GraphQLInt
+//             }
+//         }
+//     }
+// });
+// var imageType = new GraphQLObjectType({
+//     name: 'imageObject',
+//     fields: function() {
+//         return {
+//             url: {
+//                 GraphQLString
+//             },
+//             scaling: {
+//                 type: GraphQLInt
+//             }, 
+//             x: {
+//                 type: GraphQLInt
+//             },
+//             y: {
+//                 type: GraphQLInt
+//             }
+//         }
+//     }
+// });
 var logoType = new GraphQLObjectType({
     name: 'logo',
     fields: function () {
@@ -42,6 +83,18 @@ var logoType = new GraphQLObjectType({
             },
             margin: {
                 type: GraphQLInt
+            },
+            logoWidth: {
+                type: GraphQLInt
+            },
+            logoHeight: {
+                type: GraphQLInt
+            },
+            textObjectList: {
+                type: GraphQLList(GraphQLList(GraphQLString))
+            },
+            imageObjectList: {
+                type: GraphQLList(GraphQLList(GraphQLString))
             },
             lastUpdate: {
                 type: GraphQLDate
@@ -118,6 +171,19 @@ var mutation = new GraphQLObjectType({
                     margin: {
                         type: new GraphQLNonNull(GraphQLInt)
                     },
+                    logoWidth: {
+                        type: new GraphQLNonNull(GraphQLInt)
+                    },
+                    logoHeight: {
+                        type: new GraphQLNonNull(GraphQLInt)
+                    },
+                    textObjectList: {
+                        type: new GraphQLList(GraphQLList(GraphQLString))
+                    },
+                    imageObjectList: {
+                        type: new GraphQLList(GraphQLList(GraphQLString))
+                    },
+                    
                 },
                 resolve: function (root, params) {
                     const logoModel = new LogoModel(params);
@@ -162,9 +228,21 @@ var mutation = new GraphQLObjectType({
                     margin: {
                         type: new GraphQLNonNull(GraphQLInt)
                     },
+                    logoWidth: {
+                        type: new GraphQLNonNull(GraphQLInt)
+                    },
+                    logoHeight: {
+                        type: new GraphQLNonNull(GraphQLInt)
+                    },
+                    textObjectList: {
+                        type: new GraphQLList(GraphQLList(GraphQLString))
+                    },
+                    imageObjectList: {
+                        type: new GraphQLList(GraphQLList(GraphQLString))
+                    },
                 },
                 resolve(root, params) {
-                    return LogoModel.findByIdAndUpdate(params.id, { text: params.text, color: params.color, fontSize: params.fontSize, backgroundColor: params.backgroundColor, borderColor: params.borderColor, borderRadius: params.borderRadius, borderWidth: params.borderWidth, padding: params.padding, margin: params.margin, lastUpdate: new Date() }, function (err) {
+                    return LogoModel.findByIdAndUpdate(params.id, { text: params.text, color: params.color, fontSize: params.fontSize, backgroundColor: params.backgroundColor, borderColor: params.borderColor, borderRadius: params.borderRadius, borderWidth: params.borderWidth, padding: params.padding, margin: params.margin, logoWidth: params.logoWidth, logoHeight: params.logoHeight, textObjectList: params.textObjectList, imageObjectList: params.imageObjectList, lastUpdate: new Date() }, function (err) {
                         if (err) return next(err);
                     });
                 }

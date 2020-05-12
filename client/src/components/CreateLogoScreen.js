@@ -15,7 +15,11 @@ const ADD_LOGO = gql`
        $borderRadius: Int!,
        $borderWidth: Int!,
        $padding: Int!,
-       $margin: Int!) {
+       $margin: Int!,
+       $logoWidth: Int!,
+       $logoHeight: Int!,
+       $textObjectList: [[String]]!,
+       $imageObjectList: [[String]]!) {
        addLogo(
            text: $text,
            color: $color,
@@ -25,7 +29,11 @@ const ADD_LOGO = gql`
            borderRadius: $borderRadius,
            borderWidth: $borderWidth,
            padding: $padding,
-           margin: $margin) {
+           margin: $margin,
+           logoWidth: $logoWidth,
+           logoHeight: $logoHeight,
+           textObjectList: $textObjectList,
+           imageObjectList: $imageObjectList) {
            _id
        }
    }
@@ -46,6 +54,10 @@ class CreateLogoScreen extends Component {
             borderWidth: '',
             padding : '',
             margin : '',
+            logoWidth: '',
+            logoHeight: '',
+            textObjectList: [],
+            imageObjectList: []
         }
     }
     onChangeText= (event) => {
@@ -93,6 +105,16 @@ class CreateLogoScreen extends Component {
             margin: event.target.value
         });
     }
+    onChangeLogoWidth= (event) => {
+        this.setState({
+            logoWidth: event.target.value
+        });
+    }
+    onChangeLogoHeight= (event) => {
+        this.setState({
+            logoHeight: event.target.value
+        });
+    }
     initLogoProperties = () => {
         console.log("initLogoProperties")
         this.setState({
@@ -104,11 +126,13 @@ class CreateLogoScreen extends Component {
             borderRadius: "5",
             borderWidth: "5",
             padding: "1",
-            margin: "1"
+            margin: "1",
+            logoWidth: "50",
+            logoHeight:"30"
         })
     }
    render() {
-       let text, color, fontSize, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin;
+       let text, color, fontSize, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
        if (!this.logoInit) {
         this.initLogoProperties();
         this.logoInit = true;
@@ -131,7 +155,8 @@ class CreateLogoScreen extends Component {
                                    e.preventDefault();
                                    addLogo({ variables: { text: text.value, color: color.value, fontSize: parseInt(fontSize.value)
                                    , backgroundColor: backgroundColor.value, borderColor: borderColor.value, borderRadius: parseInt(borderRadius.value)
-                                   , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value) } });
+                                   , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value)
+                                   , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value) } });
                                    text.value = "";
                                    color.value = "";
                                    fontSize.value = "";
@@ -141,6 +166,8 @@ class CreateLogoScreen extends Component {
                                    borderWidth.value = "";
                                    padding.value = "";
                                    margin.value = "";
+                                   logoWidth.value = "";
+                                   logoHeight.value = "";
                                }}>
                                    <div className="form-group">
                                        <label htmlFor="text">Text:</label>
@@ -196,6 +223,18 @@ class CreateLogoScreen extends Component {
                                            margin = node;
                                        }} placeholder="Margin" min="1" max="50" defaultValue={this.state.margin}required onChange={this.onChangeMargin}/>
                                    </div>
+                                   <div className="form-group">
+                                       <label htmlFor="logoWidth">Logo Width:</label>
+                                       <input type="number" className="form-control" name="logoWidth" ref={node => {
+                                           logoWidth = node;
+                                       }} placeholder="Logo Width" min="1" max="100" defaultValue={this.state.logoWidth}required onChange={this.onChangeLogoWidth}/>
+                                   </div>
+                                   <div className="form-group">
+                                       <label htmlFor="logoHeight">Logo Height:</label>
+                                       <input type="number" className="form-control" name="logoHeight" ref={node => {
+                                           logoHeight = node;
+                                       }} placeholder="Logo Height" min="1" max="100" defaultValue={this.state.logoHeight}required onChange={this.onChangeLogoHeight}/>
+                                   </div>
                                    <button type="submit" className="btn btn-success">Submit</button>
                                </form>
                                {loading && <p>Loading...</p>}
@@ -213,6 +252,8 @@ class CreateLogoScreen extends Component {
                                                 borderWidth={this.state.borderWidth}
                                                 padding={this.state.padding}
                                                 margin={this.state.margin}
+                                                logoWidth={this.state.logoWidth}
+                                                logoHeight={this.state.logoHeight}
                                             
                                                 />
 
