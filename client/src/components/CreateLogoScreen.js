@@ -3,8 +3,10 @@ import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
 import { Link } from 'react-router-dom';
 import TextEditWorkspace from './TextEditWorkspace';
+import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 
- 
+
+
 const ADD_LOGO = gql`
    mutation AddLogo(
        $text: String!,
@@ -57,7 +59,7 @@ class CreateLogoScreen extends Component {
             logoWidth: '',
             logoHeight: '',
             textObjectList: [],
-            imageObjectList: []
+            imageObjectList: [],
         }
     }
     onChangeText= (event) => {
@@ -115,8 +117,50 @@ class CreateLogoScreen extends Component {
             logoHeight: event.target.value
         });
     }
+    handleDrag = (e, ui) => {
+        //console.log(ui);
+      };
+    handleStop = (e, item, index) => { //passes in event and current text array as item
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][0] = e.clientX + "px";
+        textObjectListCopy[index][1] = e.clientY + "px";
+        
+        //item[0] = e.clientX + "px"
+        //item[1] = e.clientY + "px"
+        //console.log(item[0] + " " + item[1]);
+        console.log(textObjectListCopy)
+        this.setState({textObjectList: textObjectListCopy})
+        //return false;
+    }
+    handleFont = (e, index) => {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][3] = e.target.value;
+        this.setState({textObjectList: textObjectListCopy})
+    }
+    handleText = (e, index) => {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][2] = e.target.value;
+        this.setState({textObjectList: textObjectListCopy})
+    }
+    handleColor = (e, index) => {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][4] = e.target.value;
+        this.setState({textObjectList: textObjectListCopy})
+    }
+    createText() {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        const x = "419px";
+        const y = "164px";
+        const text = "Sample Text";
+        const fontSize = "15";
+        const color = "#ff0000";
+        textObjectListCopy.push([x, y, text, fontSize, color])
+        console.log(textObjectListCopy)
+        this.setState({textObjectList: textObjectListCopy})
+      }
+      
     initLogoProperties = () => {
-        console.log("initLogoProperties")
+        console.log("initLogoProperties");
         this.setState({
             text: "Sample Text",
             color: "#ff0000",
@@ -128,15 +172,18 @@ class CreateLogoScreen extends Component {
             padding: "1",
             margin: "1",
             logoWidth: "50",
-            logoHeight:"30"
+            logoHeight:"30",
+            textObjectList: [],
+            imageObjectList: []
         })
     }
    render() {
        let text, color, fontSize, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
+       let textObjectList=this.state.textObjectList, imageObjectList;
        if (!this.logoInit) {
         this.initLogoProperties();
         this.logoInit = true;
-    }
+        }
        return (
            <Mutation mutation={ADD_LOGO} onCompleted={() => this.props.history.push('/')}>
                {(addLogo, { loading, error }) => (
@@ -156,7 +203,8 @@ class CreateLogoScreen extends Component {
                                    addLogo({ variables: { text: text.value, color: color.value, fontSize: parseInt(fontSize.value)
                                    , backgroundColor: backgroundColor.value, borderColor: borderColor.value, borderRadius: parseInt(borderRadius.value)
                                    , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value)
-                                   , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value) } });
+                                   , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value), textObjectList: textObjectList
+                                   , imageObjectList: ['owo'] } });
                                    text.value = "";
                                    color.value = "";
                                    fontSize.value = "";
@@ -168,6 +216,7 @@ class CreateLogoScreen extends Component {
                                    margin.value = "";
                                    logoWidth.value = "";
                                    logoHeight.value = "";
+
                                }}>
                                    <div className="form-group">
                                        <label htmlFor="text">Text:</label>
@@ -235,6 +284,31 @@ class CreateLogoScreen extends Component {
                                            logoHeight = node;
                                        }} placeholder="Logo Height" min="1" max="100" defaultValue={this.state.logoHeight}required onChange={this.onChangeLogoHeight}/>
                                    </div>
+                                   
+                                   {this.state.textObjectList.map((item, index) => {
+                                        return (
+                                            <div key={index}>
+                                            <div key={index+"text"}className="form-group">
+                                            <label htmlFor={index+"text"}>{"Text for " + index + " at " + item}</label>
+                                            <input type="text" className="form-control" name={index+"text"}  placeholder="Text" defaultValue={item[2]} onChange={(e) => this.handleText(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
+                                            </div>
+                                            
+                                            <div key={index+"font"} className="form-group">
+                                            <label htmlFor={index}>{"Font for " + index + " at " + item}:</label>
+                                            <input type="number" className="form-control" name={index+"font"}  placeholder="Font Size" min="1" max="100" defaultValue={item[3]}required onChange={(e) => this.handleFont(e, index)}/>
+                                            </div>
+                                            
+                                            <div key={index+"color"} className="form-group">
+                                            <label htmlFor={index+"color"}>{"Text color for " + index + " at " + item}</label>
+                                            <input type="color" className="form-control" name={index+"text"}  placeholder="Color" value={item[4]} onChange={(e) => this.handleColor(e, index)}/>
+                                            </div>
+                                            </div>
+                                        )
+                                   })}
+
+
+                                   <button type="button" onClick={this.createText.bind(this)}>Create New Text</button>
+                                   
                                    <button type="submit" className="btn btn-success">Submit</button>
                                </form>
                                {loading && <p>Loading...</p>}
@@ -242,21 +316,59 @@ class CreateLogoScreen extends Component {
                            </div>
                            </div>
                            <div className="col">
-                           <TextEditWorkspace
-                                                text={this.state.text}
-                                                color={this.state.color}
-                                                fontSize={this.state.fontSize}
-                                                backgroundColor={this.state.backgroundColor}
-                                                borderColor={this.state.borderColor}
-                                                borderRadius={this.state.borderRadius}
-                                                borderWidth={this.state.borderWidth}
-                                                padding={this.state.padding}
-                                                margin={this.state.margin}
-                                                logoWidth={this.state.logoWidth}
-                                                logoHeight={this.state.logoHeight}
-                                            
-                                                />
+                                <div>
+                                    {this.state.textObjectList.map((item, index) => {
+                                        return (
+                                            // <div className="box" key={index}> 
+                                            //     <div>
+                                            //         <h2>{item[0]}</h2> //prints out what's in index 0 & 1 of each list
+                                            //         <p>{item[1]}</p>
+                                            //     </div>
+                                            // </div>
+                                            <Draggable bounds="body" key={index} onDrag={this.handleDrag} onStop={(e) => this.handleStop(e, item, index)}>
+                                            <div style={{position: "absolute", left: item[0]+"px", top: item[1]+"px"}}>
+                                                <TextEditWorkspace
+                                                        text={item[2]}
+                                                        color={item[4]}
+                                                        fontSize={item[3]}
+                                                        //backgroundColor={this.state.backgroundColor}
+                                                        //borderColor={this.state.borderColor}
+                                                        //borderRadius={this.state.borderRadius}
+                                                        borderWidth="0"
+                                                        //padding={this.state.padding}
+                                                        //margin={this.state.margin}
+                                                        //logoWidth={this.state.logoWidth}
+                                                        //logoHeight={this.state.logoHeight}
+                                                                
+                                                    />
+                                            </div>
+                                            </Draggable>
+                                        )
+                                        })}
 
+                                   </div>                                
+
+                                {/* <Draggable onDrag={this.handleDrag}>
+                                <div style={{position: 'absolute', bottom: (textObjectList)[1][0], right: (textObjectList)[0][1]}}>
+                                    <TextEditWorkspace
+                                            text={this.state.text}
+                                            color={this.state.color}
+                                            fontSize={this.state.fontSize}
+                                            backgroundColor={this.state.backgroundColor}
+                                            borderColor={this.state.borderColor}
+                                            borderRadius={this.state.borderRadius}
+                                            borderWidth={this.state.borderWidth}
+                                            padding={this.state.padding}
+                                            margin={this.state.margin}
+                                            logoWidth={this.state.logoWidth}
+                                            logoHeight={this.state.logoHeight}
+                                                    
+                                        />
+                                        <div>x: {deltaPosition.x.toFixed(0)}, y: {deltaPosition.y.toFixed(0)}</div>
+                                </div>
+                                </Draggable> */}
+                           
+                            
                            </div>
                        </div>
                        </div>
