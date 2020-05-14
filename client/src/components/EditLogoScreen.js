@@ -3,20 +3,24 @@ import { Link } from 'react-router-dom';
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
 import TextEditWorkspace from './TextEditWorkspace';
+import Draggable from 'react-draggable'; // Both at the same time
+
  
 const GET_LOGO = gql`
    query logo($logoId: String) {
        logo(id: $logoId) {
            _id
            text
-           color
-           fontSize
            backgroundColor
            borderColor
            borderRadius
            borderWidth
            padding
            margin
+           logoWidth
+           logoHeight
+           textObjectList
+           imageObjectList
        }
    }
 `;
@@ -25,30 +29,41 @@ const UPDATE_LOGO = gql`
    mutation updateLogo(
        $id: String!,
        $text: String!,
-       $color: String!,
-       $fontSize: Int!,
        $backgroundColor: String!,
        $borderColor: String!,
        $borderRadius: Int!,
        $borderWidth: Int!,
        $padding: Int!,
-       $margin: Int!) {
+       $margin: Int!,
+       $logoWidth: Int!,
+       $logoHeight: Int!,
+       $textObjectList: [[String]]!,
+       $imageObjectList: [[String]]!) {
            updateLogo(
                id: $id,
                text: $text,
-               color: $color,
-               fontSize: $fontSize,
                backgroundColor: $backgroundColor,
                borderColor: $borderColor,
                borderRadius: $borderRadius,
                borderWidth: $borderWidth,
                padding: $padding,
-               margin: $margin) {
+               margin: $margin,
+               logoWidth: $logoWidth,
+               logoHeight: $logoHeight,
+               textObjectList: $textObjectList,
+               imageObjectList: $imageObjectList) {
                    lastUpdate
                }
        }
 `;
  
+const DELETE_LOGO = gql`
+  mutation removeLogo($id: String!) {
+    removeLogo(id:$id) {
+      _id
+    }
+  }
+`;
 class EditLogoScreen extends Component {
     logoInit = false;
     constructor(props) {
@@ -56,29 +71,21 @@ class EditLogoScreen extends Component {
         super(props);
         this.state = {
             text : '',
-            color : '',
-            fontSize : '',
             backgroundColor : '',
             borderColor: '',
             borderRadius : '',
             borderWidth: '',
             padding : '',
             margin : '',
+            logoWidth: '',
+            logoHeight: '',
+            textObjectList: [],
+            imageObjectList: [],
         }
     }
     onChangeText= (event) => {
         this.setState({
             text: event.target.value
-        });
-    }
-    onChangeColor= (event) => {
-        this.setState({
-            color: event.target.value
-        });
-    }
-    onChangeFontSize= (event) => {
-        this.setState({
-            fontSize: event.target.value
         });
     }
     onChangeBackgroundColor= (event) => {
@@ -111,25 +118,75 @@ class EditLogoScreen extends Component {
             margin: event.target.value
         });
     }
+    onChangeLogoWidth= (event) => {
+        this.setState({
+            logoWidth: event.target.value
+        });
+    }
+    onChangeLogoHeight= (event) => {
+        this.setState({
+            logoHeight: event.target.value
+        });
+    }
+    handleStop = (e, ui, item, index) => { //passes in event and current text array as item
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][0] = ui.x +"";
+        textObjectListCopy[index][1] = ui.y + "";
+        
+        console.log(ui)
+        this.setState({textObjectList: textObjectListCopy})
+        //return false;
+    }
+    handleFont = (e, index) => {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][3] = e.target.value;
+        this.setState({textObjectList: textObjectListCopy})
+    }
+    handleText = (e, index) => {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][2] = e.target.value;
+        this.setState({textObjectList: textObjectListCopy})
+    }
+    handleColor = (e, index) => {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        textObjectListCopy[index][4] = e.target.value;
+        this.setState({textObjectList: textObjectListCopy})
+    }
+    createText() {
+        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        const x = "0";
+        const y = "0";
+        const text = "Sample Text";
+        const fontSize = "15";
+        const color = "#ff0000";
+        textObjectListCopy.push([x, y, text, fontSize, color])
+        console.log(textObjectListCopy)
+        this.setState({textObjectList: textObjectListCopy})
+    }
+
     initLogoProperties = (logo) => {
         console.log("initLogoProperties")
         this.setState({
             text: logo.text,
-            color: logo.color,
-            fontSize: logo.fontSize,
             backgroundColor: logo.backgroundColor,
             borderColor: logo.borderColor,
             borderRadius: logo.borderRadius,
             borderWidth: logo.borderWidth,
             padding: logo.padding,
-            margin: logo.margin
+            margin: logo.margin,
+            logoWidth: logo.logoWidth,
+            logoHeight: logo.logoHeight,
+            textObjectList: logo.textObjectList,
+            imageObjectList: logo.imageObjectList
         })
     }
 
     render() {
-       let text, color, fontSize, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin;
-       return (
-           <Query query={GET_LOGO} variables={{ logoId: this.props.match.params.id }}>
+        let text, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
+        let textObjectList=this.state.textObjectList, imageObjectList;
+
+        return (
+           <Query query={GET_LOGO} variables={{ logoId: this.props.match.params.id }} fetchPolicy="no-cache">
                {({ loading, error, data }) => {
                    if (loading) return 'Loading...';
                    if (error) return `Error! ${error.message}`;
@@ -149,22 +206,24 @@ class EditLogoScreen extends Component {
                                        </h3>
                                        </div>
                                        <div className="row">
-                                        <div className="cols2">
+                                        <div className="cols2" style={{paddingRight: "15px"}}>
                                        <div className="panel-body">                                                                                   
                                                <form onSubmit={e => {
                                                    e.preventDefault();
-                                                   updateLogo({ variables: { id: data.logo._id, text: text.value, color: color.value, fontSize: parseInt(fontSize.value)
+                                                   updateLogo({ variables: { id: data.logo._id, text: text.value
                                                    , backgroundColor: backgroundColor.value, borderColor: borderColor.value, borderRadius: parseInt(borderRadius.value)
-                                                   , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value) } });
+                                                   , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value)
+                                                   , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value), textObjectList: textObjectList
+                                                   , imageObjectList: ['test'] } });
                                                    text.value = "";
-                                                   color.value = "";
-                                                   fontSize.value = "";
                                                    backgroundColor.value = "";
                                                    borderColor.value = "";
                                                    borderRadius.value = "";
                                                    borderWidth.value = "";
                                                    padding.value = "";
                                                    margin.value = "";
+                                                   logoWidth.value = "";
+                                                   logoHeight.value = "";
                                                }}>
                                                    <div className="form-group">
                                                        <label htmlFor="text">Text:</label>
@@ -173,17 +232,17 @@ class EditLogoScreen extends Component {
                                                        }} placeholder="Text" defaultValue={data.logo.text} onChange={this.onChangeText} required pattern=".*\S+.*" title="You cannot put all whitespace"/>
                                                    </div>
                                                    <div className="form-group">
-                                                       <label htmlFor="color">Color:</label>
-                                                       <input type="color" className="form-control" name="color" ref={node => {
-                                                           color = node;
-                                                       }} placeholder="Color" defaultValue={data.logo.color} onChange={this.onChangeColor}/>
-                                                   </div>
-                                                   <div className="form-group">
-                                                       <label htmlFor="fontSize">Font Size:</label>
-                                                       <input type="number" id="fontSlider" className="form-control" name="fontSize" ref={node => {
-                                                           fontSize = node;
-                                                       }} placeholder="Font Size" defaultValue={data.logo.fontSize} min="2" max="144" required onChange={this.onChangeFontSize}/>
-                                                   </div>
+                                                        <label htmlFor="logoWidth">Logo Width:</label>
+                                                        <input type="number" className="form-control" name="logoWidth" ref={node => {
+                                                        logoWidth = node;
+                                                        }} placeholder="Logo Width" min="50" max="600" defaultValue={data.logo.logoWidth}required onChange={this.onChangeLogoWidth}/>
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label htmlFor="logoHeight">Logo Height:</label>
+                                                        <input type="number" className="form-control" name="logoHeight" ref={node => {
+                                                        logoHeight = node;
+                                                        }} placeholder="Logo Height" min="50" max="600" defaultValue={data.logo.logoHeight}required onChange={this.onChangeLogoHeight}/>
+                                                    </div>
                                                    <div className="form-group">
                                                        <label htmlFor="backgroundColor">Background Color:</label>
                                                        <input type="color" className="form-control" name="backgroundColor" ref={node => {
@@ -212,16 +271,56 @@ class EditLogoScreen extends Component {
                                                        <label htmlFor="padding">Padding:</label>
                                                        <input type="number" className="form-control" name="padding" ref={node => {
                                                            padding = node;
-                                                       }} placeholder="Padding" defaultValue={data.logo.padding} min="1" max="50" required onChange={this.onChangePadding}/>
+                                                       }} placeholder="Padding" defaultValue={data.logo.padding} min="0" max="50" required onChange={this.onChangePadding}/>
                                                    </div>
                                                    <div className="form-group">
                                                        <label htmlFor="margin">Margin:</label>
                                                        <input type="number" className="form-control" name="margin" ref={node => {
                                                            margin = node;
-                                                       }} placeholder="Margin" defaultValue={data.logo.margin} min="1" max="50" required onChange={this.onChangeMargin}/>
+                                                       }} placeholder="Margin" defaultValue={data.logo.margin} min="0" max="50" required onChange={this.onChangeMargin}/>
                                                    </div>
-                                                   <button type="submit" className="btn btn-success">Submit</button>
-                                             
+
+                                                   {this.state.textObjectList.map((item, index) => {
+                                                        return (
+                                                            <div key={index}>
+                                                            <div key={index+"text"}className="form-group">
+                                                            <label htmlFor={index+"text"}>{"Text for " + index + " at " + item}</label>
+                                                            <input type="text" className="form-control" name={index+"text"}  placeholder="Text" defaultValue={item[2]} onChange={(e) => this.handleText(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
+                                                            </div>
+                                                            
+                                                            <div key={index+"font"} className="form-group">
+                                                            <label htmlFor={index}>{"Font for " + index + " at " + item}:</label>
+                                                            <input type="number" className="form-control" name={index+"font"}  placeholder="Font Size" min="1" max="100" defaultValue={item[3]}required onChange={(e) => this.handleFont(e, index)}/>
+                                                            </div>
+                                                            
+                                                            <div key={index+"color"} className="form-group">
+                                                            <label htmlFor={index+"color"}>{"Text color for " + index + " at " + item}</label>
+                                                            <input type="color" className="form-control" name={index+"text"}  placeholder="Color" value={item[4]} onChange={(e) => this.handleColor(e, index)}/>
+                                                            </div>
+                                                            </div>
+                                                        )
+                                                    })}
+
+                                                    <button type="button" onClick={this.createText.bind(this)}>Create New Text</button>
+
+                                                    <button type="submit" className="btn btn-success">Submit</button>
+                                                    
+                                                    <Mutation mutation={DELETE_LOGO} key={data.logo._id} onCompleted={() => this.props.history.push('/')}>
+                                                        {(removeLogo, { loading, error }) => (
+                                                            <div>
+                                                                <form
+                                                                    onSubmit={e => {
+                                                                        e.preventDefault();
+                                                                        removeLogo({ variables: { id: data.logo._id } });
+                                                                    }}>                                                                   
+                                                                <button type="submit" className="btn btn-danger">Delete Logo</button>
+                                                                </form>
+                                                                {loading && <p>Loading...</p>}
+                                                                {error && <p>Error :( Please try again</p>}
+                                                            </div>
+                                                        )}
+                                                    </Mutation>
+                                                
                                                </form>
                                                {loading && <p>Loading...</p>}
                                                {error && <p>Error :( Please try again</p>}
@@ -231,19 +330,45 @@ class EditLogoScreen extends Component {
  
                                            </div>
                                            </div>
-                                           <div className="col">
-                                           <TextEditWorkspace
-                                                text={this.state.text}
-                                                color={this.state.color}
-                                                fontSize={this.state.fontSize}
-                                                backgroundColor={this.state.backgroundColor}
-                                                borderColor={this.state.borderColor}
-                                                borderRadius={this.state.borderRadius}
-                                                borderWidth={this.state.borderWidth}
-                                                padding={this.state.padding}
-                                                margin={this.state.margin}
-                                            
-                                                />
+                                           <div className="col" style={{paddingLeft: 0}}>
+                                                <div style={{
+                                                    backgroundColor: this.state.backgroundColor,
+                                                    width: this.state.logoWidth + "px",
+                                                    height: this.state.logoHeight + "px", 
+                                                    padding: this.state.padding + "px", 
+                                                    margin: this.state.margin + "px",
+                                                    border: "solid",
+                                                    borderColor: this.state.borderColor,
+                                                    borderWidth: this.state.borderWidth + "px",
+                                                    borderRadius: this.state.borderRadius + "px",
+                                                    boxSizing: "border-box"
+                                                    }}>
+                                                
+                                                    {this.state.textObjectList.map((item, index) => {
+                                                        return (                                                 
+
+                                                                <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStop(e, ui, item, index)}>
+                                                                    <div style="z-index: -2;" style={{position: "absolute"}}>
+                                                                        <TextEditWorkspace
+                                                                                text={item[2]}
+                                                                                color={item[4]}
+                                                                                fontSize={item[3]}
+                                                                                //backgroundColor={this.state.backgroundColor}
+                                                                                //borderColor={this.state.borderColor}
+                                                                                //borderRadius={this.state.borderRadius}
+                                                                                borderWidth="0"
+                                                                                //padding={this.state.padding}
+                                                                                //margin={this.state.margin}
+                                                                                //logoWidth={this.state.logoWidth}
+                                                                                //logoHeight={this.state.logoHeight}
+                                                                                        
+                                                                            />
+                                                                    </div>
+                                                                </Draggable>
+                                                        )
+                                                        })}
+                                                
+                                                </div>                                
                                            </div>
                                         </div>
                                       
@@ -251,10 +376,16 @@ class EditLogoScreen extends Component {
                                    </div>
                                </div>
                            )}
+                           
                        </Mutation>
+                       
                    );
                }}
            </Query>
+
+
+
+           
        );
    }
 }

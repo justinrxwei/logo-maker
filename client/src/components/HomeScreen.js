@@ -32,7 +32,7 @@ class HomeScreen extends Component {
                                {sorted.map((logo, index) => (
                                    <div key={index} className='home_logo_link'
                                        style={{ cursor: "pointer" }}>
-                                       <Link to={`/view/${logo._id}`}>{logo.text}</Link>
+                                       <Link to={`/edit/${logo._id}`}>{logo.text}</Link>
                                    </div>
                                ))}
                            </div>

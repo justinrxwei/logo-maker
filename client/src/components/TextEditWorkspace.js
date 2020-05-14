@@ -14,6 +14,8 @@ class TextEditWorkspace extends Component {
                 borderRadius: this.props.borderRadius + "pt",
                 padding: this.props.padding + "pt",
                 margin: this.props.margin + "pt",
+                height: this.props.logoHeight + "pt",
+                width: this.props.logoWidth + "pt",
                 display: "inline-block"
             }
         }

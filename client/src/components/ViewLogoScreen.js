@@ -10,8 +10,6 @@ const GET_LOGO = gql`
         logo(id: $logoId) {
             _id
             text
-            color
-            fontSize
             backgroundColor
             borderColor
             borderRadius
@@ -55,10 +53,7 @@ class ViewLogoScreen extends Component {
                                     <dl>
                                         <dt>Text:</dt>
                                         <dd>{data.logo.text}</dd>
-                                        <dt>Color:</dt>
-                                        <dd>{data.logo.color}</dd>
-                                        <dt>Font Size:</dt>
-                                        <dd>{data.logo.fontSize}</dd>
+
                                         <dt>Background Color:</dt>
                                         <dd>{data.logo.backgroundColor}</dd>
                                         <dt>Border Color:</dt>
@@ -96,8 +91,7 @@ class ViewLogoScreen extends Component {
                                 <div className="col-14">
                                 <TextEditWorkspace
                                                 text={data.logo.text}
-                                                color={data.logo.color}
-                                                fontSize={data.logo.fontSize}
+
                                                 backgroundColor={data.logo.backgroundColor}
                                                 borderColor={data.logo.borderColor}
                                                 borderRadius={data.logo.borderRadius}

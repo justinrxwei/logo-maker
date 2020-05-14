@@ -3,15 +3,13 @@ import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
 import { Link } from 'react-router-dom';
 import TextEditWorkspace from './TextEditWorkspace';
-import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
+import Draggable from 'react-draggable'; // Both at the same time
 
 
 
 const ADD_LOGO = gql`
    mutation AddLogo(
        $text: String!,
-       $color: String!,
-       $fontSize: Int!,
        $backgroundColor: String!,
        $borderColor: String!,
        $borderRadius: Int!,
@@ -24,8 +22,6 @@ const ADD_LOGO = gql`
        $imageObjectList: [[String]]!) {
        addLogo(
            text: $text,
-           color: $color,
-           fontSize: $fontSize,
            backgroundColor: $backgroundColor,
            borderColor: $borderColor,
            borderRadius: $borderRadius,
@@ -48,8 +44,6 @@ class CreateLogoScreen extends Component {
         super(props);
         this.state = {
             text : '',
-            color : '',
-            fontSize : '',
             backgroundColor : '',
             borderColor: '',
             borderRadius : '',
@@ -65,16 +59,6 @@ class CreateLogoScreen extends Component {
     onChangeText= (event) => {
         this.setState({
             text: event.target.value
-        });
-    }
-    onChangeColor= (event) => {
-        this.setState({
-            color: event.target.value
-        });
-    }
-    onChangeFontSize= (event) => {
-        this.setState({
-            fontSize: event.target.value
         });
     }
     onChangeBackgroundColor= (event) => {
@@ -117,18 +101,13 @@ class CreateLogoScreen extends Component {
             logoHeight: event.target.value
         });
     }
-    handleDrag = (e, ui) => {
-        //console.log(ui);
-      };
-    handleStop = (e, item, index) => { //passes in event and current text array as item
+    handleStop = (e, ui, item, index) => { //passes in event and current text array as item
         let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
-        textObjectListCopy[index][0] = e.clientX + "px";
-        textObjectListCopy[index][1] = e.clientY + "px";
-        
-        //item[0] = e.clientX + "px"
-        //item[1] = e.clientY + "px"
-        //console.log(item[0] + " " + item[1]);
-        console.log(textObjectListCopy)
+        //textObjectListCopy[index][0] = e.pageX - e.target.offsetLeft + "px";
+        //textObjectListCopy[index][1] = e.pageY - e.target.offsetTop + "px";
+        textObjectListCopy[index][0] = ui.x + "";
+        textObjectListCopy[index][1] = ui.y + "";
+        console.log(e)
         this.setState({textObjectList: textObjectListCopy})
         //return false;
     }
@@ -149,36 +128,34 @@ class CreateLogoScreen extends Component {
     }
     createText() {
         let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
-        const x = "419px";
-        const y = "164px";
+        const x = "0";
+        const y = "0";
         const text = "Sample Text";
         const fontSize = "15";
         const color = "#ff0000";
         textObjectListCopy.push([x, y, text, fontSize, color])
         console.log(textObjectListCopy)
         this.setState({textObjectList: textObjectListCopy})
-      }
+    }
       
     initLogoProperties = () => {
         console.log("initLogoProperties");
         this.setState({
-            text: "Sample Text",
-            color: "#ff0000",
-            fontSize: "20",
+            text: "Logo Name",
             backgroundColor: "#ffffff",
             borderColor: "#ff0000",
             borderRadius: "5",
             borderWidth: "5",
             padding: "1",
             margin: "1",
-            logoWidth: "50",
-            logoHeight:"30",
+            logoWidth: "200",
+            logoHeight:"150",
             textObjectList: [],
             imageObjectList: []
         })
     }
    render() {
-       let text, color, fontSize, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
+       let text, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
        let textObjectList=this.state.textObjectList, imageObjectList;
        if (!this.logoInit) {
         this.initLogoProperties();
@@ -196,18 +173,16 @@ class CreateLogoScreen extends Component {
                            </h3>
                            </div>
                            <div className="row">
-                            <div className="cols2">
+                            <div className="cols2"  style={{paddingRight: "15px"}}>
                            <div className="panel-body">
                                <form onSubmit={e => {
                                    e.preventDefault();
-                                   addLogo({ variables: { text: text.value, color: color.value, fontSize: parseInt(fontSize.value)
+                                   addLogo({ variables: { text: text.value
                                    , backgroundColor: backgroundColor.value, borderColor: borderColor.value, borderRadius: parseInt(borderRadius.value)
                                    , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value)
                                    , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value), textObjectList: textObjectList
-                                   , imageObjectList: ['owo'] } });
+                                   , imageObjectList: ['test'] } });
                                    text.value = "";
-                                   color.value = "";
-                                   fontSize.value = "";
                                    backgroundColor.value = "";
                                    borderColor.value = "";
                                    borderRadius.value = "";
@@ -219,22 +194,22 @@ class CreateLogoScreen extends Component {
 
                                }}>
                                    <div className="form-group">
-                                       <label htmlFor="text">Text:</label>
+                                       <label htmlFor="text">Logo Name:</label>
                                        <input type="text" className="form-control" name="text" ref={node => {
                                            text = node;
-                                       }} placeholder="Text" defaultValue={this.state.text} onChange={this.onChangeText}required pattern=".*\S+.*" title="You cannot put all whitespace" />
+                                       }} placeholder="Logo Name" defaultValue={this.state.text} onChange={this.onChangeText}required pattern=".*\S+.*" title="You cannot put all whitespace" />
                                    </div>
                                    <div className="form-group">
-                                       <label htmlFor="color">Color:</label>
-                                       <input type="color" className="form-control" name="color" ref={node => {
-                                           color = node;
-                                       }} placeholder="Color" value={this.state.color} onChange={this.onChangeColor}/>
+                                       <label htmlFor="logoWidth">Logo Width:</label>
+                                       <input type="number" className="form-control" name="logoWidth" ref={node => {
+                                           logoWidth = node;
+                                       }} placeholder="Logo Width" min="50" max="600" defaultValue={this.state.logoWidth}required onChange={this.onChangeLogoWidth}/>
                                    </div>
                                    <div className="form-group">
-                                       <label htmlFor="fontSize">Font Size:</label>
-                                       <input type="number" className="form-control" name="fontSize" ref={node => {
-                                           fontSize = node;
-                                       }} placeholder="Font Size" min="2" max="144" defaultValue={this.state.fontSize}onChange={this.onChangeFontSize}required/>
+                                       <label htmlFor="logoHeight">Logo Height:</label>
+                                       <input type="number" className="form-control" name="logoHeight" ref={node => {
+                                           logoHeight = node;
+                                       }} placeholder="Logo Height" min="50" max="600" defaultValue={this.state.logoHeight}required onChange={this.onChangeLogoHeight}/>
                                    </div>
                                    <div className="form-group">
                                        <label htmlFor="backgroundColor">Background Color:</label>
@@ -264,26 +239,15 @@ class CreateLogoScreen extends Component {
                                        <label htmlFor="padding">Padding:</label>
                                        <input type="number" className="form-control" name="padding" ref={node => {
                                            padding = node;
-                                       }} placeholder="Padding" min="1" max="50" defaultValue={this.state.padding}onChange={this.onChangePadding}required/>
+                                       }} placeholder="Padding" min="0" max="50" defaultValue={this.state.padding}onChange={this.onChangePadding}required/>
                                    </div>
                                    <div className="form-group">
                                        <label htmlFor="margin">Margin:</label>
                                        <input type="number" className="form-control" name="margin" ref={node => {
                                            margin = node;
-                                       }} placeholder="Margin" min="1" max="50" defaultValue={this.state.margin}required onChange={this.onChangeMargin}/>
+                                       }} placeholder="Margin" min="0" max="50" defaultValue={this.state.margin}required onChange={this.onChangeMargin}/>
                                    </div>
-                                   <div className="form-group">
-                                       <label htmlFor="logoWidth">Logo Width:</label>
-                                       <input type="number" className="form-control" name="logoWidth" ref={node => {
-                                           logoWidth = node;
-                                       }} placeholder="Logo Width" min="1" max="100" defaultValue={this.state.logoWidth}required onChange={this.onChangeLogoWidth}/>
-                                   </div>
-                                   <div className="form-group">
-                                       <label htmlFor="logoHeight">Logo Height:</label>
-                                       <input type="number" className="form-control" name="logoHeight" ref={node => {
-                                           logoHeight = node;
-                                       }} placeholder="Logo Height" min="1" max="100" defaultValue={this.state.logoHeight}required onChange={this.onChangeLogoHeight}/>
-                                   </div>
+
                                    
                                    {this.state.textObjectList.map((item, index) => {
                                         return (
@@ -315,8 +279,19 @@ class CreateLogoScreen extends Component {
                                {error && <p>Error :( Please try again</p>}
                            </div>
                            </div>
-                           <div className="col">
-                                <div>
+                           <div className="col" style={{paddingLeft: 0}}>
+                                <div style={{
+                                    backgroundColor: this.state.backgroundColor,
+                                    width: this.state.logoWidth + "px",
+                                    height: this.state.logoHeight + "px", 
+                                    padding: this.state.padding + "px", 
+                                    margin: this.state.margin + "px",
+                                    border: "solid",
+                                    borderColor: this.state.borderColor,
+                                    borderWidth: this.state.borderWidth + "px",
+                                    borderRadius: this.state.borderRadius + "px",
+                                    }}>
+                                
                                     {this.state.textObjectList.map((item, index) => {
                                         return (
                                             // <div className="box" key={index}> 
@@ -325,27 +300,28 @@ class CreateLogoScreen extends Component {
                                             //         <p>{item[1]}</p>
                                             //     </div>
                                             // </div>
-                                            <Draggable bounds="body" key={index} onDrag={this.handleDrag} onStop={(e) => this.handleStop(e, item, index)}>
-                                            <div style={{position: "absolute", left: item[0]+"px", top: item[1]+"px"}}>
-                                                <TextEditWorkspace
-                                                        text={item[2]}
-                                                        color={item[4]}
-                                                        fontSize={item[3]}
-                                                        //backgroundColor={this.state.backgroundColor}
-                                                        //borderColor={this.state.borderColor}
-                                                        //borderRadius={this.state.borderRadius}
-                                                        borderWidth="0"
-                                                        //padding={this.state.padding}
-                                                        //margin={this.state.margin}
-                                                        //logoWidth={this.state.logoWidth}
-                                                        //logoHeight={this.state.logoHeight}
-                                                                
-                                                    />
-                                            </div>
-                                            </Draggable>
+
+                                                <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStop(e, ui, item, index)}>
+                                                    <div style="z-index: -2;" style={{position: "absolute"}}>
+                                                        <TextEditWorkspace
+                                                                text={item[2]}
+                                                                color={item[4]}
+                                                                fontSize={item[3]}
+                                                                //backgroundColor={this.state.backgroundColor}
+                                                                //borderColor={this.state.borderColor}
+                                                                //borderRadius={this.state.borderRadius}
+                                                                borderWidth="0"
+                                                                //padding={this.state.padding}
+                                                                //margin={this.state.margin}
+                                                                //logoWidth={this.state.logoWidth}
+                                                                //logoHeight={this.state.logoHeight}
+                                                                        
+                                                            />
+                                                    </div>
+                                                </Draggable>
                                         )
                                         })}
-
+                                
                                    </div>                                
 
                                 {/* <Draggable onDrag={this.handleDrag}>
