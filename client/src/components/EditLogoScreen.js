@@ -128,7 +128,7 @@ class EditLogoScreen extends Component {
             logoHeight: event.target.value
         });
     }
-    handleStop = (e, ui, item, index) => { //passes in event and current text array as item
+    handleStopText = (e, ui, item, index) => { //passes in event and current text array as item
         let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
         textObjectListCopy[index][0] = ui.x +"";
         textObjectListCopy[index][1] = ui.y + "";
@@ -137,6 +137,24 @@ class EditLogoScreen extends Component {
         this.setState({textObjectList: textObjectListCopy})
         //return false;
     }
+    handleStopImage = (e, ui, item, index) => { //passes in event and current text array as item
+        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
+        imageObjectListCopy[index][0] = ui.x + "";
+        imageObjectListCopy[index][1] = ui.y + "";
+        console.log(e)
+        this.setState({imageObjectList: imageObjectListCopy})
+        //return false;
+    }
+    handleScaling = (e, index) => {
+        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
+        imageObjectListCopy[index][3] = e.target.value;
+        this.setState({imageObjectList: imageObjectListCopy})
+    }
+    handleURL = (e, index) => {
+        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
+        imageObjectListCopy[index][2] = e.target.value;
+        this.setState({imageObjectList: imageObjectListCopy})
+    }  
     handleFont = (e, index) => {
         let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
         textObjectListCopy[index][3] = e.target.value;
@@ -163,7 +181,16 @@ class EditLogoScreen extends Component {
         console.log(textObjectListCopy)
         this.setState({textObjectList: textObjectListCopy})
     }
-
+    createImage() {
+        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
+        const x = "0";
+        const y = "0";
+        const URL = "https://i.insider.com/5df126b679d7570ad2044f3e?width=2500&format=jpeg&auto=webp";
+        const scaling = "200";
+        imageObjectListCopy.push([x, y, URL, scaling])
+        console.log(imageObjectListCopy)
+        this.setState({imageObjectList: imageObjectListCopy})
+    }
     initLogoProperties = (logo) => {
         console.log("initLogoProperties")
         this.setState({
@@ -183,7 +210,7 @@ class EditLogoScreen extends Component {
 
     render() {
         let text, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
-        let textObjectList=this.state.textObjectList, imageObjectList;
+        let textObjectList=this.state.textObjectList, imageObjectList = this.state.imageObjectList;
 
         return (
            <Query query={GET_LOGO} variables={{ logoId: this.props.match.params.id }} fetchPolicy="no-cache">
@@ -207,14 +234,14 @@ class EditLogoScreen extends Component {
                                        </div>
                                        <div className="row">
                                         <div className="cols2" style={{paddingRight: "15px"}}>
-                                       <div className="panel-body">                                                                                   
+                                       <div className="panel-body" style={{overflowY:"scroll", height:"80vh"}}>                                                                                   
                                                <form onSubmit={e => {
                                                    e.preventDefault();
                                                    updateLogo({ variables: { id: data.logo._id, text: text.value
                                                    , backgroundColor: backgroundColor.value, borderColor: borderColor.value, borderRadius: parseInt(borderRadius.value)
                                                    , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value)
                                                    , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value), textObjectList: textObjectList
-                                                   , imageObjectList: ['test'] } });
+                                                   , imageObjectList: imageObjectList } });
                                                    text.value = "";
                                                    backgroundColor.value = "";
                                                    borderColor.value = "";
@@ -225,8 +252,9 @@ class EditLogoScreen extends Component {
                                                    logoWidth.value = "";
                                                    logoHeight.value = "";
                                                }}>
+
                                                    <div className="form-group">
-                                                       <label htmlFor="text">Text:</label>
+                                                       <label htmlFor="text">Logo Name:</label>
                                                        <input type="text" className="form-control" name="text" ref={node => {
                                                            text = node;
                                                        }} placeholder="Text" defaultValue={data.logo.text} onChange={this.onChangeText} required pattern=".*\S+.*" title="You cannot put all whitespace"/>
@@ -235,13 +263,13 @@ class EditLogoScreen extends Component {
                                                         <label htmlFor="logoWidth">Logo Width:</label>
                                                         <input type="number" className="form-control" name="logoWidth" ref={node => {
                                                         logoWidth = node;
-                                                        }} placeholder="Logo Width" min="50" max="600" defaultValue={data.logo.logoWidth}required onChange={this.onChangeLogoWidth}/>
+                                                        }} placeholder="Logo Width" min="50" max="1000" defaultValue={data.logo.logoWidth}required onChange={this.onChangeLogoWidth}/>
                                                     </div>
                                                     <div className="form-group">
                                                         <label htmlFor="logoHeight">Logo Height:</label>
                                                         <input type="number" className="form-control" name="logoHeight" ref={node => {
                                                         logoHeight = node;
-                                                        }} placeholder="Logo Height" min="50" max="600" defaultValue={data.logo.logoHeight}required onChange={this.onChangeLogoHeight}/>
+                                                        }} placeholder="Logo Height" min="50" max="1000" defaultValue={data.logo.logoHeight}required onChange={this.onChangeLogoHeight}/>
                                                     </div>
                                                    <div className="form-group">
                                                        <label htmlFor="backgroundColor">Background Color:</label>
@@ -282,29 +310,48 @@ class EditLogoScreen extends Component {
 
                                                    {this.state.textObjectList.map((item, index) => {
                                                         return (
+                                                            <div style={{background: "#feebb4", padding: "10px", borderRadius: "10px"}}>
                                                             <div key={index}>
                                                             <div key={index+"text"}className="form-group">
-                                                            <label htmlFor={index+"text"}>{"Text for " + index + " at " + item}</label>
+                                                            <label htmlFor={index+"text"}>{"Text #" + (index+1) + " Text Input:"}</label>
                                                             <input type="text" className="form-control" name={index+"text"}  placeholder="Text" defaultValue={item[2]} onChange={(e) => this.handleText(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
                                                             </div>
                                                             
                                                             <div key={index+"font"} className="form-group">
-                                                            <label htmlFor={index}>{"Font for " + index + " at " + item}:</label>
-                                                            <input type="number" className="form-control" name={index+"font"}  placeholder="Font Size" min="1" max="100" defaultValue={item[3]}required onChange={(e) => this.handleFont(e, index)}/>
+                                                            <label htmlFor={index}>{"Text #" + (index+1) + " Font Size:"}:</label>
+                                                            <input type="number" className="form-control" name={index+"font"}  placeholder="Font Size" min="1" max="150" defaultValue={item[3]}required onChange={(e) => this.handleFont(e, index)}/>
                                                             </div>
                                                             
                                                             <div key={index+"color"} className="form-group">
-                                                            <label htmlFor={index+"color"}>{"Text color for " + index + " at " + item}</label>
+                                                            <label htmlFor={index+"color"}>{"Text #" + (index+1) + " Text Color:"}</label>
                                                             <input type="color" className="form-control" name={index+"text"}  placeholder="Color" value={item[4]} onChange={(e) => this.handleColor(e, index)}/>
+                                                            </div>
                                                             </div>
                                                             </div>
                                                         )
                                                     })}
+                                                    {this.state.imageObjectList.map((item, index) => {
+                                                            return (
+                                                                <div style={{background: "#e7fefd", padding: "10px", borderRadius: "10px"}}>
+                                                                <div key={index}>
+                                                                <div key={index+"image"}className="form-group">
+                                                                <label htmlFor={index+"image"}>{"Image #" + (index+1) + " URL:"}</label>
+                                                                <input type="text" className="form-control" name={index+"url"}  placeholder="URL" defaultValue={item[2]} onChange={(e) => this.handleURL(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
+                                                                </div>
+                                                                
+                                                                <div key={index+"scaling"} className="form-group">
+                                                                <label htmlFor={index+"scaling"}>{"Image #" + (index+1) + " Size:"}:</label>
+                                                                <input type="number" className="form-control" name={index+"font"}  placeholder="Scaling" min="50" max="1000" defaultValue={item[3]}required onChange={(e) => this.handleScaling(e, index)}/>
+                                                                </div>                                        
+                                                                </div>
+                                                                </div>
+                                                            )
+                                                    })}
+                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.createText.bind(this)}>Create New Text </button>
+                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.createImage.bind(this)}>Create New Image</button>
 
-                                                    <button type="button" onClick={this.createText.bind(this)}>Create New Text</button>
-
-                                                    <button type="submit" className="btn btn-success">Submit</button>
-                                                    
+                                                    <button type="submit" style={{margin:5}} className="btn btn-success">Submit</button>    
+                                               
                                                     <Mutation mutation={DELETE_LOGO} key={data.logo._id} onCompleted={() => this.props.history.push('/')}>
                                                         {(removeLogo, { loading, error }) => (
                                                             <div>
@@ -313,7 +360,7 @@ class EditLogoScreen extends Component {
                                                                         e.preventDefault();
                                                                         removeLogo({ variables: { id: data.logo._id } });
                                                                     }}>                                                                   
-                                                                <button type="submit" className="btn btn-danger">Delete Logo</button>
+                                                                <button type="submit" style={{margin:5}} className="btn btn-danger">Delete Logo</button>
                                                                 </form>
                                                                 {loading && <p>Loading...</p>}
                                                                 {error && <p>Error :( Please try again</p>}
@@ -341,14 +388,15 @@ class EditLogoScreen extends Component {
                                                     borderColor: this.state.borderColor,
                                                     borderWidth: this.state.borderWidth + "px",
                                                     borderRadius: this.state.borderRadius + "px",
-                                                    boxSizing: "border-box"
+                                                    boxSizing: "content-box",
+                                                    position: "relative"
                                                     }}>
                                                 
                                                     {this.state.textObjectList.map((item, index) => {
                                                         return (                                                 
 
-                                                                <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStop(e, ui, item, index)}>
-                                                                    <div style="z-index: -2;" style={{position: "absolute"}}>
+                                                                <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStopText(e, ui, item, index)}>
+                                                                    <div style={{position: "absolute"}}>
                                                                         <TextEditWorkspace
                                                                                 text={item[2]}
                                                                                 color={item[4]}
@@ -366,8 +414,17 @@ class EditLogoScreen extends Component {
                                                                     </div>
                                                                 </Draggable>
                                                         )
-                                                        })}
-                                                
+                                                    })}
+                                                    {this.state.imageObjectList.map((item, index) => {
+                                                        return (
+                                                            <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStopImage(e, ui, item, index)}>
+                                                                <div style="z-index: -2;" style={{position: "absolute"}}>
+                                                                    <img src={item[2]}  width={item[3]} draggable="false"                                                                                                                  
+                                                                        />
+                                                                </div>
+                                                            </Draggable>
+                                                        )
+                                                    })}     
                                                 </div>                                
                                            </div>
                                         </div>
