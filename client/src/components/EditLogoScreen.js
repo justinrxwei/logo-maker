@@ -4,6 +4,7 @@ import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
 import TextEditWorkspace from './TextEditWorkspace';
 import Draggable from 'react-draggable'; // Both at the same time
+import domtoimage from 'dom-to-image';
 
  
 const GET_LOGO = gql`
@@ -82,7 +83,9 @@ class EditLogoScreen extends Component {
             textObjectList: [],
             imageObjectList: [],
         }
+        this.refs = React.createRef();
     }
+
     onChangeText= (event) => {
         this.setState({
             text: event.target.value
@@ -191,6 +194,16 @@ class EditLogoScreen extends Component {
         console.log(imageObjectListCopy)
         this.setState({imageObjectList: imageObjectListCopy})
     }
+    exportImage() {
+        var logoObject = document.getElementById('LogoCanvas');
+        domtoimage.toJpeg(logoObject, { quality: 1.00 })
+            .then(function (dataUrl) {
+                var link = document.createElement('a');
+                link.download = 'Logo.jpeg';
+                link.href = dataUrl;
+                link.click();
+        });
+    }
     initLogoProperties = (logo) => {
         console.log("initLogoProperties")
         this.setState({
@@ -234,7 +247,7 @@ class EditLogoScreen extends Component {
                                        </div>
                                        <div className="row">
                                         <div className="cols2" style={{paddingRight: "15px"}}>
-                                       <div className="panel-body" style={{overflowY:"scroll", height:"80vh"}}>                                                                                   
+                                       <div className="panel-body" style={{overflowY:"scroll", height:"80vh", background: "#ffffe6", padding: "10px", borderRadius: "5px"}}>                                                                                   
                                                <form onSubmit={e => {
                                                    e.preventDefault();
                                                    updateLogo({ variables: { id: data.logo._id, text: text.value
@@ -310,7 +323,7 @@ class EditLogoScreen extends Component {
 
                                                    {this.state.textObjectList.map((item, index) => {
                                                         return (
-                                                            <div style={{background: "#feebb4", padding: "10px", borderRadius: "10px"}}>
+                                                            <div style={{background: "#feebb4", padding: "10px", borderRadius: "10px", marginTop: "8px"}}>
                                                             <div key={index}>
                                                             <div key={index+"text"}className="form-group">
                                                             <label htmlFor={index+"text"}>{"Text #" + (index+1) + " Text Input:"}</label>
@@ -332,7 +345,7 @@ class EditLogoScreen extends Component {
                                                     })}
                                                     {this.state.imageObjectList.map((item, index) => {
                                                             return (
-                                                                <div style={{background: "#e7fefd", padding: "10px", borderRadius: "10px"}}>
+                                                                <div style={{background: "#e7fefd", padding: "10px", borderRadius: "10px", marginTop: "8px"}}>
                                                                 <div key={index}>
                                                                 <div key={index+"image"}className="form-group">
                                                                 <label htmlFor={index+"image"}>{"Image #" + (index+1) + " URL:"}</label>
@@ -349,9 +362,11 @@ class EditLogoScreen extends Component {
                                                     })}
                                                     <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.createText.bind(this)}>Create New Text </button>
                                                     <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.createImage.bind(this)}>Create New Image</button>
+                                                    <div>
+                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.exportImage.bind(this)}>    Export Logo    </button>
 
-                                                    <button type="submit" style={{margin:5}} className="btn btn-success">Submit</button>    
-                                               
+                                                    <button type="submit" style={{margin:5}} className="btn btn-success">    Submit Logo    </button>    
+                                                    </div>
                                                     <Mutation mutation={DELETE_LOGO} key={data.logo._id} onCompleted={() => this.props.history.push('/')}>
                                                         {(removeLogo, { loading, error }) => (
                                                             <div>
@@ -377,7 +392,7 @@ class EditLogoScreen extends Component {
  
                                            </div>
                                            </div>
-                                           <div className="col" style={{paddingLeft: 0}}>
+                                           <div className="col" style={{paddingLeft: 0}} >
                                                 <div style={{
                                                     backgroundColor: this.state.backgroundColor,
                                                     width: this.state.logoWidth + "px",
@@ -390,7 +405,7 @@ class EditLogoScreen extends Component {
                                                     borderRadius: this.state.borderRadius + "px",
                                                     boxSizing: "content-box",
                                                     position: "relative"
-                                                    }}>
+                                                    }} id="LogoCanvas" >
                                                 
                                                     {this.state.textObjectList.map((item, index) => {
                                                         return (                                                 
