@@ -20,8 +20,7 @@ const GET_LOGO = gql`
            margin
            logoWidth
            logoHeight
-           textObjectList
-           imageObjectList
+           objectList
        }
    }
 `;
@@ -38,8 +37,7 @@ const UPDATE_LOGO = gql`
        $margin: Int!,
        $logoWidth: Int!,
        $logoHeight: Int!,
-       $textObjectList: [[String]]!,
-       $imageObjectList: [[String]]!) {
+       $objectList: [[String]]!,) {
            updateLogo(
                id: $id,
                text: $text,
@@ -51,8 +49,7 @@ const UPDATE_LOGO = gql`
                margin: $margin,
                logoWidth: $logoWidth,
                logoHeight: $logoHeight,
-               textObjectList: $textObjectList,
-               imageObjectList: $imageObjectList) {
+               objectList: $objectList,) {
                    lastUpdate
                }
        }
@@ -80,8 +77,7 @@ class EditLogoScreen extends Component {
             margin : '',
             logoWidth: '',
             logoHeight: '',
-            textObjectList: [],
-            imageObjectList: [],
+            objectList: [],
         }
         this.refs = React.createRef();
     }
@@ -132,67 +128,67 @@ class EditLogoScreen extends Component {
         });
     }
     handleStopText = (e, ui, item, index) => { //passes in event and current text array as item
-        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
-        textObjectListCopy[index][0] = ui.x +"";
-        textObjectListCopy[index][1] = ui.y + "";
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][0] = ui.x +"";
+        objectListCopy[index][1] = ui.y + "";
         
         console.log(ui)
-        this.setState({textObjectList: textObjectListCopy})
+        this.setState({objectList: objectListCopy})
         //return false;
     }
     handleStopImage = (e, ui, item, index) => { //passes in event and current text array as item
-        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
-        imageObjectListCopy[index][0] = ui.x + "";
-        imageObjectListCopy[index][1] = ui.y + "";
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][0] = ui.x + "";
+        objectListCopy[index][1] = ui.y + "";
         console.log(e)
-        this.setState({imageObjectList: imageObjectListCopy})
+        this.setState({objectList: objectListCopy})
         //return false;
     }
     handleScaling = (e, index) => {
-        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
-        imageObjectListCopy[index][3] = e.target.value;
-        this.setState({imageObjectList: imageObjectListCopy})
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][3] = e.target.value;
+        this.setState({objectList: objectListCopy})
     }
     handleURL = (e, index) => {
-        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
-        imageObjectListCopy[index][2] = e.target.value;
-        this.setState({imageObjectList: imageObjectListCopy})
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][2] = e.target.value;
+        this.setState({objectList: objectListCopy})
     }  
     handleFont = (e, index) => {
-        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
-        textObjectListCopy[index][3] = e.target.value;
-        this.setState({textObjectList: textObjectListCopy})
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][3] = e.target.value;
+        this.setState({objectList: objectListCopy})
     }
     handleText = (e, index) => {
-        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
-        textObjectListCopy[index][2] = e.target.value;
-        this.setState({textObjectList: textObjectListCopy})
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][2] = e.target.value;
+        this.setState({objectList: objectListCopy})
     }
     handleColor = (e, index) => {
-        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
-        textObjectListCopy[index][4] = e.target.value;
-        this.setState({textObjectList: textObjectListCopy})
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy[index][4] = e.target.value;
+        this.setState({objectList: objectListCopy})
     }
     createText() {
-        let textObjectListCopy = JSON.parse(JSON.stringify(this.state.textObjectList));
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
         const x = "0";
         const y = "0";
         const text = "Sample Text";
         const fontSize = "15";
         const color = "#ff0000";
-        textObjectListCopy.push([x, y, text, fontSize, color])
-        console.log(textObjectListCopy)
-        this.setState({textObjectList: textObjectListCopy})
+        objectListCopy.push([x, y, text, fontSize, color, "text"])
+        console.log(objectListCopy)
+        this.setState({objectList: objectListCopy})
     }
     createImage() {
-        let imageObjectListCopy = JSON.parse(JSON.stringify(this.state.imageObjectList));
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
         const x = "0";
         const y = "0";
         const URL = "https://i.insider.com/5df126b679d7570ad2044f3e?width=2500&format=jpeg&auto=webp";
         const scaling = "200";
-        imageObjectListCopy.push([x, y, URL, scaling])
-        console.log(imageObjectListCopy)
-        this.setState({imageObjectList: imageObjectListCopy})
+        objectListCopy.push([x, y, URL, scaling,'',''])
+        console.log(objectListCopy)
+        this.setState({objectList: objectListCopy})
     }
     exportImage() {
         var logoObject = document.getElementById('LogoCanvas');
@@ -203,6 +199,31 @@ class EditLogoScreen extends Component {
                 link.href = dataUrl;
                 link.click();
         });
+    }
+    moveBackwards(item,index) {
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        if (index != 0) {
+            let temp = objectListCopy[index];
+            objectListCopy[index] = objectListCopy[index-1];
+            objectListCopy[index-1] = temp;
+            this.setState({objectList: objectListCopy})
+        }
+
+    }
+    moveForwards(item,index) {
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        if (index != objectListCopy.length - 1) {
+            let temp = objectListCopy[index];
+            objectListCopy[index] = objectListCopy[index+1];
+            objectListCopy[index+1] = temp;
+            this.setState({objectList: objectListCopy})
+        }
+
+    }
+    deleteObject(item,index) {
+        let objectListCopy = JSON.parse(JSON.stringify(this.state.objectList));
+        objectListCopy.splice(index,1);
+        this.setState({objectList: objectListCopy})
     }
     initLogoProperties = (logo) => {
         console.log("initLogoProperties")
@@ -216,14 +237,13 @@ class EditLogoScreen extends Component {
             margin: logo.margin,
             logoWidth: logo.logoWidth,
             logoHeight: logo.logoHeight,
-            textObjectList: logo.textObjectList,
-            imageObjectList: logo.imageObjectList
+            objectList: logo.objectList,
         })
     }
 
     render() {
         let text, backgroundColor, borderColor, borderRadius, borderWidth, padding, margin, logoWidth, logoHeight;
-        let textObjectList=this.state.textObjectList, imageObjectList = this.state.imageObjectList;
+        let objectList=this.state.objectList
 
         return (
            <Query query={GET_LOGO} variables={{ logoId: this.props.match.params.id }} fetchPolicy="no-cache">
@@ -253,8 +273,8 @@ class EditLogoScreen extends Component {
                                                    updateLogo({ variables: { id: data.logo._id, text: text.value
                                                    , backgroundColor: backgroundColor.value, borderColor: borderColor.value, borderRadius: parseInt(borderRadius.value)
                                                    , borderWidth: parseInt(borderWidth.value), padding: parseInt(padding.value), margin: parseInt(margin.value)
-                                                   , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value), textObjectList: textObjectList
-                                                   , imageObjectList: imageObjectList } });
+                                                   , logoWidth: parseInt(logoWidth.value), logoHeight: parseInt(logoHeight.value), objectList: objectList
+                                                   } });
                                                    text.value = "";
                                                    backgroundColor.value = "";
                                                    borderColor.value = "";
@@ -321,44 +341,54 @@ class EditLogoScreen extends Component {
                                                        }} placeholder="Margin" defaultValue={data.logo.margin} min="0" max="50" required onChange={this.onChangeMargin}/>
                                                    </div>
 
-                                                   {this.state.textObjectList.map((item, index) => {
-                                                        return (
-                                                            <div style={{background: "#feebb4", padding: "10px", borderRadius: "10px", marginTop: "8px"}}>
-                                                            <div key={index}>
-                                                            <div key={index+"text"}className="form-group">
-                                                            <label htmlFor={index+"text"}>{"Text #" + (index+1) + " Text Input:"}</label>
-                                                            <input type="text" className="form-control" name={index+"text"}  placeholder="Text" defaultValue={item[2]} onChange={(e) => this.handleText(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
-                                                            </div>
-                                                            
-                                                            <div key={index+"font"} className="form-group">
-                                                            <label htmlFor={index}>{"Text #" + (index+1) + " Font Size:"}:</label>
-                                                            <input type="number" className="form-control" name={index+"font"}  placeholder="Font Size" min="1" max="150" defaultValue={item[3]}required onChange={(e) => this.handleFont(e, index)}/>
-                                                            </div>
-                                                            
-                                                            <div key={index+"color"} className="form-group">
-                                                            <label htmlFor={index+"color"}>{"Text #" + (index+1) + " Text Color:"}</label>
-                                                            <input type="color" className="form-control" name={index+"text"}  placeholder="Color" value={item[4]} onChange={(e) => this.handleColor(e, index)}/>
-                                                            </div>
-                                                            </div>
-                                                            </div>
-                                                        )
-                                                    })}
-                                                    {this.state.imageObjectList.map((item, index) => {
-                                                            return (
-                                                                <div style={{background: "#e7fefd", padding: "10px", borderRadius: "10px", marginTop: "8px"}}>
-                                                                <div key={index}>
-                                                                <div key={index+"image"}className="form-group">
-                                                                <label htmlFor={index+"image"}>{"Image #" + (index+1) + " URL:"}</label>
-                                                                <input type="text" className="form-control" name={index+"url"}  placeholder="URL" defaultValue={item[2]} onChange={(e) => this.handleURL(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
-                                                                </div>
-                                                                
-                                                                <div key={index+"scaling"} className="form-group">
-                                                                <label htmlFor={index+"scaling"}>{"Image #" + (index+1) + " Size:"}:</label>
-                                                                <input type="number" className="form-control" name={index+"font"}  placeholder="Scaling" min="50" max="1000" defaultValue={item[3]}required onChange={(e) => this.handleScaling(e, index)}/>
-                                                                </div>                                        
-                                                                </div>
-                                                                </div>
-                                                            )
+                                                   {this.state.objectList.map((item, index) => {
+                                                            if (objectList[index][5] == "text")
+                                                                return (
+                                                                    <div style={{background: "#feebb4", padding: "10px", borderRadius: "10px", marginTop: "8px"}}>
+                                                                    <div key={index+"text"}className="form-group">
+                                                                    <label htmlFor={index+"text"}>{"Text #" + (index+1) + " Text Input:"}</label>
+                                                                    <input type="text" className="form-control" name={index+"text"}  placeholder="Text" value={item[2]} onChange={(e) => this.handleText(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
+                                                                    </div>
+                                                                    
+                                                                    <div key={index+"font"} className="form-group">
+                                                                    <label htmlFor={index}>{"Text #" + (index+1) + " Font Size:"}:</label>
+                                                                    <input type="number" className="form-control" name={index+"font"}  placeholder="Font Size" min="1" max="150" value={item[3]}required onChange={(e) => this.handleFont(e, index)}/>
+                                                                    </div>
+                                                                    
+                                                                    <div key={index+"color"} className="form-group">
+                                                                    <label htmlFor={index+"color"}>{"Text #" + (index+1) + " Text Color:"}</label>
+                                                                    <input type="color" className="form-control" name={index+"text"}  placeholder="Color" value={item[4]} onChange={(e) => this.handleColor(e, index)}/>
+                                                                    </div>
+                                                                    <div>
+                                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={() => this.moveForwards(item,index)}>Move Forwards</button>
+                                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={() => this.moveBackwards(item,index)}>Move Backwards</button>
+                                                                    </div>
+                                                                    <button type="button" style={{margin:5}} className="btn btn-danger" onClick={() => this.deleteObject(item,index)}>Delete Text</button>
+
+                                                                    </div>
+                                                                )
+                                                            else
+                                                                return (
+                                                                    <div style={{background: "#e7fefd", padding: "10px", borderRadius: "10px", marginTop: "8px"}}>
+                                                                    <div key={index+"image"}className="form-group">
+                                                                    <label htmlFor={index+"image"}>{"Set Image URL:"}</label>
+                                                                    <input type="text" className="form-control" name={index+"url"}  placeholder="URL" value={item[2]} onChange={(e) => this.handleURL(e, index)}required pattern=".*\S+.*" title="You cannot put all whitespace" />
+                                                                    </div>
+                                                                    
+                                                                    <div key={index+"scaling"} className="form-group">
+                                                                    <label htmlFor={index+"scaling"}>{"Set Image Size:"}:</label>
+                                                                    <input type="number" className="form-control" name={index+"font"}  placeholder="Scaling" min="50" max="1000" value={item[3]}required onChange={(e) => this.handleScaling(e, index)}/>
+                                                                    </div>
+                                                                    <div>
+                                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={() => this.moveForwards(item,index)}>Move Forwards</button>
+                                                                    <button type="button" style={{margin:5}} className="btn btn-primary" onClick={() => this.moveBackwards(item,index)}>Move Backwards</button>
+                                                                    </div>
+
+                                                                    <button type="button" style={{margin:5}} className="btn btn-danger" onClick={() => this.deleteObject(item,index)}>Delete Image</button>
+
+                                                                    </div>
+                                                                    
+                                                                )
                                                     })}
                                                     <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.createText.bind(this)}>Create New Text </button>
                                                     <button type="button" style={{margin:5}} className="btn btn-primary" onClick={this.createImage.bind(this)}>Create New Image</button>
@@ -393,6 +423,11 @@ class EditLogoScreen extends Component {
                                            </div>
                                            </div>
                                            <div className="col" style={{paddingLeft: 0}} >
+                                                <div id="LogoCanvas" style={{
+                                                    width: parseInt(this.state.logoWidth) + parseInt(this.state.margin)*2 + parseInt(this.state.padding)*2 + + parseInt(this.state.borderWidth)*2 +"px",
+                                                    height: parseInt(this.state.logoHeight) + parseInt(this.state.margin)*2 + parseInt(this.state.padding)*2 + + parseInt(this.state.borderWidth)*2 +"px" ,
+                                                    
+                                                }} > 
                                                 <div style={{
                                                     backgroundColor: this.state.backgroundColor,
                                                     width: this.state.logoWidth + "px",
@@ -405,45 +440,43 @@ class EditLogoScreen extends Component {
                                                     borderRadius: this.state.borderRadius + "px",
                                                     boxSizing: "content-box",
                                                     position: "relative"
-                                                    }} id="LogoCanvas" >
-                                                
-                                                    {this.state.textObjectList.map((item, index) => {
-                                                        return (                                                 
-
-                                                                <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStopText(e, ui, item, index)}>
-                                                                    <div style={{position: "absolute"}}>
-                                                                        <TextEditWorkspace
-                                                                                text={item[2]}
-                                                                                color={item[4]}
-                                                                                fontSize={item[3]}
-                                                                                //backgroundColor={this.state.backgroundColor}
-                                                                                //borderColor={this.state.borderColor}
-                                                                                //borderRadius={this.state.borderRadius}
-                                                                                borderWidth="0"
-                                                                                //padding={this.state.padding}
-                                                                                //margin={this.state.margin}
-                                                                                //logoWidth={this.state.logoWidth}
-                                                                                //logoHeight={this.state.logoHeight}
-                                                                                        
-                                                                            />
-                                                                    </div>
-                                                                </Draggable>
-                                                        )
-                                                    })}
-                                                    {this.state.imageObjectList.map((item, index) => {
+                                                    }}>
+                                                {this.state.objectList.map((item, index) => {
+                                                    if (objectList[index][5] == "text")
                                                         return (
-                                                            <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStopImage(e, ui, item, index)}>
-                                                                <div style="z-index: -2;" style={{position: "absolute"}}>
-                                                                    <img src={item[2]}  width={item[3]} draggable="false"                                                                                                                  
+                                                            <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStopText(e, ui, item, index)}>
+                                                                <div style={{position: "absolute"}}>
+                                                                    <TextEditWorkspace
+                                                                            text={item[2]}
+                                                                            color={item[4]}
+                                                                            fontSize={item[3]}
+                                                                            //backgroundColor={this.state.backgroundColor}
+                                                                            //borderColor={this.state.borderColor}
+                                                                            //borderRadius={this.state.borderRadius}
+                                                                            borderWidth="0"
+                                                                            //padding={this.state.padding}
+                                                                            //margin={this.state.margin}
+                                                                            //logoWidth={this.state.logoWidth}
+                                                                            //logoHeight={this.state.logoHeight}                                                              
                                                                         />
                                                                 </div>
                                                             </Draggable>
                                                         )
-                                                    })}     
+                                                    else
+                                                    return (
+                                                        <Draggable bounds="parent" position={{x: parseInt(item[0]), y: parseInt(item[1])}} key={index} onStop={(e, ui) => this.handleStopImage(e, ui, item, index)}>
+                                                            <div style={{position: "absolute"}}>
+                                                                <img src={item[2]}  width={item[3]} draggable="false"                                                                                                                  
+                                                                    />
+                                                            </div>
+                                                        </Draggable>
+                                                    )
+                                                    })}
+ 
                                                 </div>                                
                                            </div>
                                         </div>
-                                      
+                                        </div>
  
                                    </div>
                                </div>

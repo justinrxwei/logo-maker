@@ -9,47 +9,6 @@ var GraphQLInt = require('graphql').GraphQLInt;
 var GraphQLDate = require('graphql-date');
 var LogoModel = require('../models/Logo');
 
-// var textType = new GraphQLObjectType({
-//     name: 'textObject',
-//     fields: function() {
-//         return {
-//             text: {
-//                 GraphQLString
-//             },
-//             color: {
-//                 type: GraphQLString
-//             }, 
-//             fontSize: {
-//                 type: GraphQLInt
-//             },
-//             x: {
-//                 type: GraphQLInt
-//             },
-//             y: {
-//                 type: GraphQLInt
-//             }
-//         }
-//     }
-// });
-// var imageType = new GraphQLObjectType({
-//     name: 'imageObject',
-//     fields: function() {
-//         return {
-//             url: {
-//                 GraphQLString
-//             },
-//             scaling: {
-//                 type: GraphQLInt
-//             }, 
-//             x: {
-//                 type: GraphQLInt
-//             },
-//             y: {
-//                 type: GraphQLInt
-//             }
-//         }
-//     }
-// });
 var logoType = new GraphQLObjectType({
     name: 'logo',
     fields: function () {
@@ -59,12 +18,6 @@ var logoType = new GraphQLObjectType({
             },
             text: {
                 type: GraphQLString
-            },
-            color: {
-                type: GraphQLString
-            },
-            fontSize: {
-                type: GraphQLInt
             },
             backgroundColor: {
                 type: GraphQLString
@@ -90,10 +43,7 @@ var logoType = new GraphQLObjectType({
             logoHeight: {
                 type: GraphQLInt
             },
-            textObjectList: {
-                type: GraphQLList(GraphQLList(GraphQLString))
-            },
-            imageObjectList: {
+            objectList: {
                 type: GraphQLList(GraphQLList(GraphQLString))
             },
             lastUpdate: {
@@ -146,13 +96,7 @@ var mutation = new GraphQLObjectType({
                 args: {
                     text: {
                         type: new GraphQLNonNull(GraphQLString)
-                    },
-                    color: {
-                        type: new GraphQLNonNull(GraphQLString)
-                    },
-                    fontSize: {
-                        type: new GraphQLNonNull(GraphQLInt)
-                    },
+                    },                    
                     backgroundColor: {
                         type: new GraphQLNonNull(GraphQLString)
                     },
@@ -177,10 +121,7 @@ var mutation = new GraphQLObjectType({
                     logoHeight: {
                         type: new GraphQLNonNull(GraphQLInt)
                     },
-                    textObjectList: {
-                        type: new GraphQLList(GraphQLList(GraphQLString))
-                    },
-                    imageObjectList: {
+                    objectList: {
                         type: new GraphQLList(GraphQLList(GraphQLString))
                     },
                     
@@ -204,12 +145,6 @@ var mutation = new GraphQLObjectType({
                     text: {
                         type: new GraphQLNonNull(GraphQLString)
                     },
-                    color: {
-                        type: new GraphQLNonNull(GraphQLString)
-                    },
-                    fontSize: {
-                        type: new GraphQLNonNull(GraphQLInt)
-                    },
                     backgroundColor: {
                         type: new GraphQLNonNull(GraphQLString)
                     },
@@ -234,15 +169,12 @@ var mutation = new GraphQLObjectType({
                     logoHeight: {
                         type: new GraphQLNonNull(GraphQLInt)
                     },
-                    textObjectList: {
-                        type: new GraphQLList(GraphQLList(GraphQLString))
-                    },
-                    imageObjectList: {
+                    objectList: {
                         type: new GraphQLList(GraphQLList(GraphQLString))
                     },
                 },
                 resolve(root, params) {
-                    return LogoModel.findByIdAndUpdate(params.id, { text: params.text, color: params.color, fontSize: params.fontSize, backgroundColor: params.backgroundColor, borderColor: params.borderColor, borderRadius: params.borderRadius, borderWidth: params.borderWidth, padding: params.padding, margin: params.margin, logoWidth: params.logoWidth, logoHeight: params.logoHeight, textObjectList: params.textObjectList, imageObjectList: params.imageObjectList, lastUpdate: new Date() }, function (err) {
+                    return LogoModel.findByIdAndUpdate(params.id, { text: params.text, backgroundColor: params.backgroundColor, borderColor: params.borderColor, borderRadius: params.borderRadius, borderWidth: params.borderWidth, padding: params.padding, margin: params.margin, logoWidth: params.logoWidth, logoHeight: params.logoHeight, objectList: params.objectList, lastUpdate: new Date() }, function (err) {
                         if (err) return next(err);
                     });
                 }
