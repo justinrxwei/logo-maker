@@ -7,5 +7,4 @@ Web application built with MongoDB, Express, React, and Node that allows users t
 3. Run nodemon in server folder to start and connect to Express server
 4. Run npm start in client folder to start React project
 
-## Edit Logo UI
 ![Alt text](https://i.imgur.com/60EwG3Z.png "Optional title")
